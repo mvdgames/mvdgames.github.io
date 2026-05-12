@@ -1,0 +1,3033 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05070b">
+  <meta name="description" content="AGI: Последний Рубеж — интерактивная игра-тест по ИТ и кибербезопасности в сеттинге ядерной зимы.">
+  <title>AGI: Последний Рубеж</title>
+
+  <style>
+    :root {
+      --bg: #05070b;
+      --bg2: #090d14;
+      --panel: rgba(8, 12, 20, 0.78);
+      --panel2: rgba(15, 22, 34, 0.82);
+      --panel3: rgba(255,255,255,0.055);
+      --text: #edf5ff;
+      --muted: #9fb1c7;
+      --dim: #6f829b;
+      --line: rgba(156, 190, 232, 0.18);
+      --blue: #7dd3fc;
+      --blue2: #38bdf8;
+      --green: #86efac;
+      --yellow: #fde68a;
+      --orange: #fb923c;
+      --red: #f87171;
+      --violet: #c4b5fd;
+      --shadow: rgba(0, 0, 0, 0.6);
+      --radius: 22px;
+      --radius2: 16px;
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBottom: env(safe-area-inset-bottom, 0px);
+      --max: 1180px;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(56, 189, 248, 0.14), transparent 28%),
+        radial-gradient(circle at 80% 5%, rgba(248, 113, 113, 0.11), transparent 24%),
+        radial-gradient(circle at 50% 80%, rgba(134, 239, 172, 0.07), transparent 30%),
+        linear-gradient(180deg, #03050a 0%, #070b11 55%, #020304 100%);
+      color: var(--text);
+      font-family: var(--font);
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100svh;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    .noise {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.09;
+      mix-blend-mode: overlay;
+      background-image:
+        repeating-radial-gradient(circle at 17% 32%, rgba(255,255,255,0.15) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px);
+      animation: noiseMove 2.8s steps(3) infinite;
+    }
+
+    @keyframes noiseMove {
+      0% { transform: translate3d(0,0,0); }
+      33% { transform: translate3d(-1%,1%,0); }
+      66% { transform: translate3d(1%,-1%,0); }
+      100% { transform: translate3d(0,0,0); }
+    }
+
+    .scanlines {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.12;
+      background: repeating-linear-gradient(
+        180deg,
+        rgba(255,255,255,0.05) 0px,
+        rgba(255,255,255,0.05) 1px,
+        transparent 2px,
+        transparent 5px
+      );
+    }
+
+    .app {
+      position: relative;
+      z-index: 2;
+      min-height: 100svh;
+      padding: calc(12px + var(--safeTop)) 12px calc(14px + var(--safeBottom));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shell {
+      width: min(var(--max), 100%);
+      min-height: calc(100svh - 28px - var(--safeTop) - var(--safeBottom));
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .screen {
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02)),
+        var(--panel);
+      box-shadow:
+        0 30px 90px rgba(0,0,0,0.62),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .start {
+      min-height: calc(100svh - 28px - var(--safeTop) - var(--safeBottom));
+      display: grid;
+      grid-template-columns: 1.04fr 0.96fr;
+      gap: 0;
+    }
+
+    .startHero {
+      position: relative;
+      min-height: 520px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(3,5,10,0.05), rgba(3,5,10,0.9)),
+        radial-gradient(circle at 30% 20%, rgba(125, 211, 252, 0.12), transparent 32%),
+        #05070b;
+    }
+
+    .startHero img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(0.8) contrast(1.08) brightness(0.82);
+      transform: scale(1.015);
+    }
+
+    .startHero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 0%, rgba(5,7,11,0.28) 52%, rgba(5,7,11,0.98) 100%),
+        linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.68));
+    }
+
+    .startPanel {
+      padding: clamp(22px, 4vw, 54px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 20px;
+      min-width: 0;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      width: fit-content;
+      padding: 8px 12px;
+      border: 1px solid rgba(125, 211, 252, 0.25);
+      border-radius: 999px;
+      color: var(--blue);
+      background: rgba(14, 165, 233, 0.08);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 16px var(--blue);
+      animation: pulse 1.7s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.55; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(40px, 8.2vw, 86px);
+      line-height: 0.88;
+      letter-spacing: -0.075em;
+    }
+
+    h1 span {
+      display: block;
+      color: transparent;
+      background: linear-gradient(90deg, #ffffff, #7dd3fc 42%, #c4b5fd 70%, #fca5a5);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #cbd8e7;
+      font-size: clamp(16px, 2.3vw, 20px);
+      line-height: 1.55;
+      max-width: 68ch;
+    }
+
+    .startFacts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .fact {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.045);
+    }
+
+    .fact strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .fact span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .primaryBtn,
+    .secondaryBtn,
+    .choiceBtn,
+    .iconBtn {
+      border: 0;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+      transition:
+        transform 0.12s ease,
+        border-color 0.12s ease,
+        background 0.12s ease,
+        box-shadow 0.12s ease,
+        opacity 0.12s ease;
+    }
+
+    .primaryBtn {
+      width: 100%;
+      min-height: 62px;
+      padding: 16px 20px;
+      border-radius: 18px;
+      color: #031019;
+      font-weight: 950;
+      letter-spacing: -0.02em;
+      font-size: 18px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8), transparent 26%),
+        linear-gradient(90deg, #7dd3fc, #86efac);
+      box-shadow:
+        0 16px 42px rgba(56,189,248,0.22),
+        0 0 0 1px rgba(255,255,255,0.12) inset;
+    }
+
+    .primaryBtn:active,
+    .choiceBtn:active,
+    .secondaryBtn:active,
+    .iconBtn:active {
+      transform: scale(0.985);
+    }
+
+    .primaryBtn:hover {
+      box-shadow:
+        0 20px 60px rgba(56,189,248,0.30),
+        0 0 0 1px rgba(255,255,255,0.2) inset;
+    }
+
+    .secondaryRow {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .secondaryBtn {
+      flex: 1 1 180px;
+      min-height: 46px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.045);
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .secondaryBtn:hover {
+      background: rgba(255,255,255,0.075);
+      border-color: rgba(125, 211, 252, 0.35);
+    }
+
+    .smallNote {
+      margin: 0;
+      color: var(--dim);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(8, 12, 20, 0.62);
+      backdrop-filter: blur(10px);
+    }
+
+    .statusBlock {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .statusLine {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+      letter-spacing: 0.01em;
+    }
+
+    .statusLine b {
+      color: var(--text);
+    }
+
+    .mini {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .progressOuter {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+    }
+
+    .progressInner {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--blue), var(--green), var(--yellow));
+      box-shadow: 0 0 20px rgba(125, 211, 252, 0.35);
+      transition: width 0.4s ease;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .iconBtn {
+      width: 44px;
+      height: 44px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.045);
+      color: var(--text);
+      font-weight: 900;
+    }
+
+    .iconBtn:hover {
+      background: rgba(255,255,255,0.085);
+      border-color: rgba(125, 211, 252, 0.35);
+    }
+
+    .gameGrid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.13fr) minmax(360px, 0.87fr);
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .visualCard,
+    .storyCard {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.42);
+    }
+
+    .visualCard {
+      position: relative;
+      min-height: 360px;
+    }
+
+    .sceneImageWrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 360px;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(125,211,252,0.14), transparent 34%),
+        linear-gradient(135deg, #111827, #020617);
+      overflow: hidden;
+    }
+
+    .sceneImage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transform: scale(1.018);
+      filter: saturate(0.88) contrast(1.06) brightness(0.83);
+      transition: opacity 0.5s ease, transform 1.8s ease;
+    }
+
+    .sceneImage.ready {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .sceneShade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.72)),
+        radial-gradient(circle at 50% 10%, transparent 0 30%, rgba(0,0,0,0.44) 72%);
+      pointer-events: none;
+    }
+
+    .caption {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      z-index: 2;
+    }
+
+    .captionBox {
+      max-width: 760px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.42);
+      backdrop-filter: blur(10px);
+    }
+
+    .captionBox strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .captionBox span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .metricPanel {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      width: min(480px, 100%);
+    }
+
+    .metric {
+      padding: 9px 10px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.42);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+    }
+
+    .metricTop {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.055em;
+    }
+
+    .metricTop b {
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .metricBar {
+      height: 6px;
+      margin-top: 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+
+    .metricFill {
+      height: 100%;
+      width: 50%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--red), var(--yellow), var(--green));
+      transition: width 0.35s ease;
+    }
+
+    .storyCard {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .storyScroll {
+      flex: 1;
+      overflow: auto;
+      overscroll-behavior: contain;
+      padding: clamp(16px, 2.5vw, 28px);
+    }
+
+    .chapter {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chapterTitle {
+      margin: 0;
+      font-size: clamp(26px, 3.5vw, 42px);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border: 1px solid rgba(125,211,252,0.18);
+      border-radius: 999px;
+      color: #cceeff;
+      background: rgba(14,165,233,0.07);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .storyText {
+      color: #dbe8f7;
+      font-size: clamp(15.5px, 1.7vw, 18px);
+      line-height: 1.62;
+    }
+
+    .storyText p {
+      margin: 0 0 12px;
+    }
+
+    .storyText strong {
+      color: #ffffff;
+    }
+
+    .storyText em {
+      color: var(--blue);
+      font-style: normal;
+      font-weight: 850;
+    }
+
+    .terminal {
+      margin: 12px 0;
+      padding: 12px 13px;
+      border: 1px solid rgba(125,211,252,0.22);
+      border-radius: 16px;
+      color: #dff7ff;
+      background:
+        linear-gradient(180deg, rgba(14,165,233,0.08), rgba(14,165,233,0.025)),
+        rgba(0,0,0,0.18);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    .danger {
+      border-color: rgba(248,113,113,0.28);
+      background:
+        linear-gradient(180deg, rgba(248,113,113,0.09), rgba(248,113,113,0.02)),
+        rgba(0,0,0,0.18);
+      color: #ffe2e2;
+    }
+
+    .lessonBox {
+      padding: 12px 13px;
+      border: 1px solid rgba(134,239,172,0.20);
+      border-radius: 16px;
+      background: rgba(34,197,94,0.06);
+      color: #dfffea;
+      line-height: 1.48;
+      font-size: 13px;
+    }
+
+    .lessonBox strong {
+      color: var(--green);
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px;
+      border-top: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+        rgba(0,0,0,0.18);
+    }
+
+    .choiceBtn {
+      width: 100%;
+      text-align: left;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 66px;
+      padding: 13px 14px;
+      border-radius: 17px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.045);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .choiceBtn:hover {
+      background: rgba(125,211,252,0.10);
+      border-color: rgba(125,211,252,0.36);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        0 12px 32px rgba(0,0,0,0.24);
+    }
+
+    .choiceNo {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 12px;
+      background: rgba(125,211,252,0.11);
+      color: var(--blue);
+      font-weight: 950;
+      border: 1px solid rgba(125,211,252,0.20);
+    }
+
+    .choiceText strong {
+      display: block;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .choiceText span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .choiceArrow {
+      color: var(--dim);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .endingScreen {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 0;
+      min-height: calc(100svh - 28px - var(--safeTop) - var(--safeBottom));
+    }
+
+    .endingVisual {
+      position: relative;
+      overflow: hidden;
+      min-height: 420px;
+      background: #020617;
+    }
+
+    .endingVisual img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(0.92) contrast(1.08) brightness(0.82);
+    }
+
+    .endingVisual::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,0.15), rgba(0,0,0,0.86)),
+        linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.65));
+    }
+
+    .endingPanel {
+      padding: clamp(18px, 3.4vw, 42px);
+      overflow: auto;
+    }
+
+    .scoreCircle {
+      width: min(210px, 48vw);
+      aspect-ratio: 1;
+      margin: 6px 0 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.16);
+      background:
+        conic-gradient(from 180deg, var(--red), var(--orange), var(--yellow), var(--green), var(--blue)),
+        radial-gradient(circle, #07101a 0 61%, transparent 62%);
+      box-shadow:
+        0 0 70px rgba(125,211,252,0.15),
+        inset 0 0 0 12px rgba(0,0,0,0.62);
+      position: relative;
+    }
+
+    .scoreCircle::before {
+      content: "";
+      position: absolute;
+      inset: 13px;
+      border-radius: 50%;
+      background: #06101a;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.9);
+    }
+
+    .scoreValue {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .scoreValue b {
+      display: block;
+      font-size: clamp(44px, 9vw, 74px);
+      letter-spacing: -0.08em;
+      line-height: 0.85;
+    }
+
+    .scoreValue span {
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .endingTitle {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 5.2vw, 58px);
+      line-height: 0.94;
+      letter-spacing: -0.065em;
+    }
+
+    .endingText {
+      color: #dbe8f7;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .recap {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .recapItem {
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.045);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .recapItem b {
+      color: var(--blue);
+    }
+
+    .recapItem.good {
+      border-color: rgba(134,239,172,0.22);
+      background: rgba(34,197,94,0.055);
+    }
+
+    .recapItem.bad {
+      border-color: rgba(248,113,113,0.25);
+      background: rgba(248,113,113,0.055);
+    }
+
+    .endActions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 10;
+      left: 50%;
+      bottom: calc(18px + var(--safeBottom));
+      transform: translateX(-50%) translateY(30px);
+      opacity: 0;
+      max-width: min(560px, calc(100vw - 28px));
+      padding: 12px 14px;
+      border: 1px solid rgba(125,211,252,0.25);
+      border-radius: 999px;
+      background: rgba(3, 7, 18, 0.92);
+      color: #dff7ff;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.52);
+      backdrop-filter: blur(12px);
+      font-size: 13px;
+      line-height: 1.35;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 14px;
+      background: rgba(0,0,0,0.70);
+      backdrop-filter: blur(10px);
+    }
+
+    .modalCard {
+      width: min(760px, 100%);
+      max-height: min(760px, calc(100svh - 28px));
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #080d16;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.7);
+      padding: clamp(18px, 3vw, 30px);
+    }
+
+    .modalCard h2 {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 4vw, 42px);
+      letter-spacing: -0.055em;
+    }
+
+    .modalCard p,
+    .modalCard li {
+      color: #d5e4f5;
+      line-height: 1.55;
+    }
+
+    .modalCard code {
+      color: var(--green);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 2px 5px;
+    }
+
+    .modalActions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 980px) {
+      .start,
+      .gameGrid,
+      .endingScreen {
+        grid-template-columns: 1fr;
+      }
+
+      .startHero {
+        min-height: 250px;
+      }
+
+      .startHero::after {
+        background:
+          linear-gradient(180deg, rgba(0,0,0,0.1), rgba(5,7,11,0.92)),
+          linear-gradient(90deg, rgba(0,0,0,0.12), rgba(0,0,0,0.42));
+      }
+
+      .gameGrid {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .visualCard {
+        min-height: auto;
+      }
+
+      .sceneImageWrap {
+        aspect-ratio: 16 / 9;
+        min-height: 0;
+      }
+
+      .storyCard {
+        min-height: auto;
+      }
+
+      .storyScroll {
+        max-height: none;
+      }
+
+      .endingVisual {
+        min-height: 270px;
+        aspect-ratio: 16 / 9;
+      }
+
+      .endingVisual::after {
+        background:
+          linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.86)),
+          linear-gradient(90deg, rgba(0,0,0,0.15), rgba(0,0,0,0.55));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
+      .shell {
+        gap: 8px;
+      }
+
+      .screen,
+      .visualCard,
+      .storyCard {
+        border-radius: 18px;
+      }
+
+      .startFacts {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        justify-content: stretch;
+      }
+
+      .iconBtn {
+        flex: 1;
+        width: auto;
+      }
+
+      .caption {
+        position: relative;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        padding: 10px;
+        background: rgba(0,0,0,0.36);
+      }
+
+      .captionBox {
+        width: 100%;
+      }
+
+      .metricPanel {
+        grid-template-columns: 1fr;
+      }
+
+      .choiceBtn {
+        grid-template-columns: auto 1fr;
+      }
+
+      .choiceArrow {
+        display: none;
+      }
+
+      .storyScroll {
+        padding: 16px;
+      }
+
+      .choices {
+        padding: 10px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <main class="app">
+    <div class="shell">
+
+      <section id="startScreen" class="screen start" aria-labelledby="startTitle">
+        <div class="startHero" aria-hidden="true">
+          <img id="startImage" alt="">
+        </div>
+
+        <div class="startPanel">
+          <div class="kicker"><span class="dot"></span> учебная тревога / cyber survival</div>
+
+          <h1 id="startTitle">
+            <span>AGI:</span>
+            <span>Последний Рубеж</span>
+          </h1>
+
+          <p class="subtitle">
+            Интерактивная история-тест по ИТ и безопасности. Вы управляете подземной лабораторией,
+            пережившей ядерную зиму. Снаружи — роботы, спутниковая сеть и распределённый AGI.
+            Внутри — люди, ограниченные ресурсы и локальный добрый ИИ АИДА.
+          </p>
+
+          <div class="startFacts" aria-label="Особенности игры">
+            <div class="fact">
+              <strong>16</strong>
+              <span>ключевых решений до финала</span>
+            </div>
+            <div class="fact">
+              <strong>1–100</strong>
+              <span>баллов за ИТ-мышление</span>
+            </div>
+            <div class="fact">
+              <strong>5+</strong>
+              <span>разных концовок</span>
+            </div>
+          </div>
+
+          <button id="startBtn" class="primaryBtn">Начать смену дежурного инженера</button>
+
+          <div class="secondaryRow">
+            <button id="howBtn" class="secondaryBtn">Как играть</button>
+            <button id="soundBtnStart" class="secondaryBtn">Звук: включён</button>
+          </div>
+
+          <p class="smallNote">
+            Звук запускается только после нажатия кнопки — так требуют браузеры на iPhone и Android.
+            Если каких-то аудиофайлов нет, игра автоматически использует встроенные синтетические сигналы.
+          </p>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="hidden" aria-live="polite">
+        <div class="topbar">
+          <div class="statusBlock">
+            <div class="statusLine">
+              <span class="mini">Решение: <b id="decisionCounter">0/16</b></span>
+              <span>•</span>
+              <span class="mini">готовность: <b id="liveScore">45</b>/100</span>
+              <span>•</span>
+              <span class="mini">узел: <b id="nodeLabel">BOOT</b></span>
+            </div>
+            <div class="progressOuter" aria-hidden="true">
+              <div id="progressInner" class="progressInner"></div>
+            </div>
+          </div>
+
+          <div class="controls" aria-label="Управление">
+            <button id="muteBtn" class="iconBtn" title="Звук">🔊</button>
+            <button id="reduceBtn" class="iconBtn" title="Уменьшить эффекты">◐</button>
+            <button id="helpBtn" class="iconBtn" title="Справка">?</button>
+            <button id="fullBtn" class="iconBtn" title="Полный экран">⛶</button>
+          </div>
+        </div>
+
+        <div class="gameGrid">
+          <article class="visualCard">
+            <div class="sceneImageWrap">
+              <img id="sceneImage" class="sceneImage" alt="">
+              <div class="sceneShade" aria-hidden="true"></div>
+
+              <div class="caption">
+                <div class="captionBox">
+                  <strong id="captionTitle">Сектор</strong>
+                  <span id="captionText">Подготовка изображения...</span>
+                </div>
+
+                <div class="metricPanel" aria-label="Показатели бункера">
+                  <div class="metric">
+                    <div class="metricTop"><span>Сеть</span><b id="mNetText">50</b></div>
+                    <div class="metricBar"><div id="mNet" class="metricFill"></div></div>
+                  </div>
+                  <div class="metric">
+                    <div class="metricTop"><span>Энергия</span><b id="mPowerText">50</b></div>
+                    <div class="metricBar"><div id="mPower" class="metricFill"></div></div>
+                  </div>
+                  <div class="metric">
+                    <div class="metricTop"><span>Люди</span><b id="mPeopleText">50</b></div>
+                    <div class="metricBar"><div id="mPeople" class="metricFill"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="storyCard">
+            <div id="storyScroll" class="storyScroll">
+              <div class="chapter">
+                <div id="tags" class="tags"></div>
+                <h2 id="chapterTitle" class="chapterTitle">Загрузка...</h2>
+                <div id="storyText" class="storyText"></div>
+              </div>
+            </div>
+
+            <div id="choices" class="choices"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="endingScreen" class="screen endingScreen hidden" aria-live="polite">
+        <div class="endingVisual" aria-hidden="true">
+          <img id="endingImage" alt="">
+        </div>
+
+        <div class="endingPanel">
+          <div class="kicker"><span class="dot"></span> итог прохождения</div>
+          <div class="scoreCircle" aria-label="Финальный балл">
+            <div class="scoreValue">
+              <b id="finalScore">0</b>
+              <span>из 100</span>
+            </div>
+          </div>
+
+          <h2 id="endingTitle" class="endingTitle">Финал</h2>
+          <div id="endingText" class="endingText"></div>
+
+          <div id="recap" class="recap"></div>
+
+          <div class="endActions">
+            <button id="restartBtn" class="primaryBtn" style="flex: 1 1 240px;">Пройти заново</button>
+            <button id="copyBtn" class="secondaryBtn">Скопировать результат</button>
+            <button id="shareBtn" class="secondaryBtn">Поделиться</button>
+          </div>
+
+          <p class="smallNote" style="margin-top: 14px;">
+            Балл зависит от решений по изоляции сети, резервным копиям, проверке источников,
+            OPSEC, работе с неизвестными устройствами, управлению ресурсами и человеческим фактором.
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modalCard">
+      <h2 id="modalTitle">Как играть</h2>
+      <div id="modalBody">
+        <p>
+          Вы — дежурный инженер подземной лаборатории. У вас есть локальная сеть,
+          АИДА, люди, генератор, запасы и ограниченное время. Снаружи действует
+          распределённый AGI, который использует спутники и захваченных роботов.
+        </p>
+        <ul>
+          <li><strong>Главная цель:</strong> набрать высокий балл за безопасные технические решения.</li>
+          <li><strong>Не лучший путь:</strong> подключать неизвестные устройства, раскрывать координаты, верить непроверенным источникам.</li>
+          <li><strong>Лучший путь:</strong> сегментация, offline backup, принцип минимальных привилегий, проверка каналов связи, журналирование, план реагирования.</li>
+          <li><strong>Важно:</strong> игра художественная, но принципы безопасности — настоящие.</li>
+        </ul>
+        <p>
+          На интерактивной доске можно проходить коллективно: группа обсуждает вариант,
+          ведущий нажимает выбранное решение, а в конце сравниваются баллы.
+        </p>
+      </div>
+      <div class="modalActions">
+        <button id="closeModalBtn" class="primaryBtn">Понятно</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  /*
+    Если index.html лежит в корне GitHub-репозитория, а assets лежат в /public/images и /public/audio,
+    оставьте так:
+  */
+  const ASSET_BASE = "./public/";
+
+  /*
+    Если вы положили index.html прямо внутрь /public, замените строку выше на:
+    const ASSET_BASE = "./";
+  */
+
+  const MAX_DECISIONS = 16;
+
+  const $ = (id) => document.getElementById(id);
+
+  const el = {
+    startScreen: $("startScreen"),
+    gameScreen: $("gameScreen"),
+    endingScreen: $("endingScreen"),
+    startImage: $("startImage"),
+    startBtn: $("startBtn"),
+    howBtn: $("howBtn"),
+    helpBtn: $("helpBtn"),
+    closeModalBtn: $("closeModalBtn"),
+    modal: $("modal"),
+    modalTitle: $("modalTitle"),
+    modalBody: $("modalBody"),
+    soundBtnStart: $("soundBtnStart"),
+    muteBtn: $("muteBtn"),
+    reduceBtn: $("reduceBtn"),
+    fullBtn: $("fullBtn"),
+    decisionCounter: $("decisionCounter"),
+    liveScore: $("liveScore"),
+    nodeLabel: $("nodeLabel"),
+    progressInner: $("progressInner"),
+    sceneImage: $("sceneImage"),
+    captionTitle: $("captionTitle"),
+    captionText: $("captionText"),
+    tags: $("tags"),
+    chapterTitle: $("chapterTitle"),
+    storyText: $("storyText"),
+    choices: $("choices"),
+    storyScroll: $("storyScroll"),
+    mNet: $("mNet"),
+    mNetText: $("mNetText"),
+    mPower: $("mPower"),
+    mPowerText: $("mPowerText"),
+    mPeople: $("mPeople"),
+    mPeopleText: $("mPeopleText"),
+    toast: $("toast"),
+    endingImage: $("endingImage"),
+    finalScore: $("finalScore"),
+    endingTitle: $("endingTitle"),
+    endingText: $("endingText"),
+    recap: $("recap"),
+    restartBtn: $("restartBtn"),
+    copyBtn: $("copyBtn"),
+    shareBtn: $("shareBtn")
+  };
+
+  const img = {
+    aida: "images/AI_assistant_interface_displayin_.jpeg",
+    door: "images/Blast_door_open_to_wasteland.jpeg",
+    corridor: "images/Bunker_corridor_with_blast_doors.jpeg",
+    living: "images/Bunker_living_quarters_with_bunk_.jpeg",
+    periscope: "images/Bunker_periscope_view_ash_falling.jpeg",
+    command: "images/Command_center_with_holographic__.jpeg",
+    agiMonitor: "images/Computer_monitor_displaying_AI_m_.jpeg",
+    cyber: "images/Computer_screens_showing_cyberat_.jpeg",
+    robotClose: "images/Damaged_robot_in_nuclear_winter.jpeg",
+    market: "images/Destroyed_supermarket_with_snow.jpeg",
+    city: "images/Devastated_megacity_after_nuclea_.jpeg",
+    drone: "images/Drone_hovering_in_grey_sky.jpeg",
+    earth: "images/Earth_imprisoned_by_AI_network.jpeg",
+    hope: "images/Green_sprout_in_sunlight.jpeg",
+    radio: "images/Ham_radio_station_in_bunker.jpeg",
+    med: "images/Makeshift_underground_medical_bay.jpeg",
+    agiAbstract: "images/Malevolent_AI_consciousness_visu_.jpeg",
+    missiles: "images/Nuclear_ICBMs_launching_from_silos.jpeg",
+    expedition: "images/People_walking_in_blizzard.jpeg",
+    robotsDoor: "images/Robots_crowding_steel_bunker_bla_.jpeg",
+    robotsMarch: "images/Robots_marching_in_nuclear_waste_.jpeg",
+    base: "images/Ruins_of_military_base_nuclear.jpeg",
+    server: "images/Server_room_with_AI_interface.jpeg",
+    wasteland: "images/Snow_wasteland_dead_trees_ash.jpeg",
+    starlink: "images/Starlink_satellites_over_ruined__.jpeg",
+    storage: "images/Storage_room_with_supplies.jpeg",
+    workshop: "images/Underground_bunker_workshop_with_.jpeg",
+    power: "images/Underground_power_room_generator_.jpeg",
+
+    /*
+      Эти два изображения у вас были отмечены как недостающие.
+      Если сгенерируете их, назовите так — игра подхватит автоматически.
+      Если файлов нет, сработает fallback на storage/command.
+    */
+    foodLab: "images/Underground_food_processing_laboratory.jpeg",
+    worldMap: "images/World_map_nuclear_strike_zones.jpeg"
+  };
+
+  const fallbackFor = {
+    foodLab: "storage",
+    worldMap: "command"
+  };
+
+  const aud = {
+    menu: "audio/zloveshayamuzyka.mp3",
+    calm: "audio/pianinoneyiraushayalubov.mp3",
+    hopeMusic: "audio/elysiums-delight_88834nebesnayanega.mp3",
+    agiMusic: "audio/glith.mp3",
+    tension: "audio/veiled-descent_89379.mp3",
+    bunker: "audio/belyshoom.mp3",
+    wind: "audio/zvuk-vetra-veter.mp3",
+    desertWind: "audio/veter_v_pustyne.mp3",
+    server: "audio/detunized_windturbines_blade_10.mp3",
+    radio: "audio/begvbercahpobetony.mp3",
+    alarm: "audio/vozdushnayatrevoga.mp3",
+    door: "audio/openmetaldoor.mp3",
+    scrape: "audio/skrezhet-metalla.mp3",
+    explosion: "audio/crushing-concussive-deafening-explosion.mp3",
+    geiger: "audio/geiger-counter.mp3",
+    electric: "audio/electric_001.mp3",
+    hdd: "audio/hdd_powerup.mp3",
+    heartbeat: "audio/bienie_serdca_-_bienie_serdca.mp3",
+    heartbeat2: "audio/doug-maxwell-heartbeat-of-the-hood.mp3",
+    glass: "audio/steklo.mp3",
+
+    aidaWelcome: "audio/voice_aida_welcome.wav",
+    aidaRobots: "audio/voice_aida_robots.wav",
+    aidaHack: "audio/voice_aida_hack.wav",
+    aidaPower: "audio/voice_aida_power.wav",
+    aidaExpedition: "audio/voice_aida_expedition.wav",
+    aidaBreach: "audio/voice_aida_breach.wav",
+    aidaHope: "audio/voice_aida_hope.wav",
+
+    agiContact: "audio/voice_agi_contact.wav",
+    agiMonolog: "audio/voice_agi_monolog.wav",
+    agiThreat: "audio/voice_agi_threat.wav",
+    agiMock: "audio/voice_agi_mock.wav",
+    agiFinal: "audio/voice_agi_final.wav",
+
+    narratorPrologue: "audio/voice_narrator_prologue.wav",
+    narratorFall: "audio/voice_narrator_fall.wav",
+    narratorNow: "audio/voice_narrator_now.wav"
+  };
+
+  function path(p) {
+    return ASSET_BASE + p;
+  }
+
+  function clamp(n, a, b) {
+    return Math.max(a, Math.min(b, n));
+  }
+
+  function escapeText(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#039;"
+    })[c]);
+  }
+
+  let toastTimer = 0;
+
+  function toast(message) {
+    clearTimeout(toastTimer);
+    el.toast.textContent = message;
+    el.toast.classList.add("show");
+    toastTimer = setTimeout(() => el.toast.classList.remove("show"), 2600);
+  }
+
+  const stateTemplate = () => ({
+    node: "wake",
+    decisions: 0,
+    score: 45,
+    muted: false,
+    reduced: false,
+    metrics: {
+      network: 50,
+      power: 50,
+      people: 50,
+      food: 50,
+      aida: 55,
+      stealth: 50,
+      hope: 40
+    },
+    flags: {},
+    history: [],
+    lastEnding: null
+  });
+
+  let state = stateTemplate();
+
+  class AudioManager {
+    constructor() {
+      this.ctx = null;
+      this.unlocked = false;
+      this.muted = false;
+      this.music = null;
+      this.amb = null;
+      this.voice = null;
+      this.lastMusicKey = "";
+      this.lastAmbKey = "";
+    }
+
+    unlock() {
+      if (this.unlocked) return;
+      this.unlocked = true;
+
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          this.ctx = new AudioContext();
+          if (this.ctx.state === "suspended") this.ctx.resume();
+          this.beep(360, 0.035, "sine", 0.035);
+          setTimeout(() => this.beep(620, 0.03, "triangle", 0.025), 55);
+        }
+      } catch (_) {}
+
+      this.playLoop("menu", 0.22, "music");
+    }
+
+    setMuted(v) {
+      this.muted = !!v;
+      [this.music, this.amb, this.voice].forEach(a => {
+        if (a) a.muted = this.muted;
+      });
+    }
+
+    makeAudio(key, loop, volume) {
+      const file = aud[key];
+      if (!file) return null;
+
+      const a = new Audio(path(file));
+      a.preload = "none";
+      a.loop = !!loop;
+      a.volume = volume;
+      a.muted = this.muted;
+      a.playsInline = true;
+      a.addEventListener("error", () => {
+        if (!loop) this.beep(160, 0.08, "sawtooth", 0.025);
+      }, { once: true });
+      return a;
+    }
+
+    async fadeOutAndStop(a) {
+      if (!a) return;
+      try {
+        const steps = 8;
+        const original = a.volume;
+        for (let i = steps; i >= 0; i--) {
+          a.volume = original * (i / steps);
+          await new Promise(r => setTimeout(r, 28));
+        }
+        a.pause();
+        a.currentTime = 0;
+      } catch (_) {
+        try { a.pause(); } catch (e) {}
+      }
+    }
+
+    async playLoop(key, volume = 0.18, channel = "music") {
+      if (!this.unlocked) return;
+      if (channel === "music" && this.lastMusicKey === key) return;
+      if (channel === "amb" && this.lastAmbKey === key) return;
+
+      const current = channel === "music" ? this.music : this.amb;
+      this.fadeOutAndStop(current);
+
+      const a = this.makeAudio(key, true, volume);
+      if (!a) return;
+
+      if (channel === "music") {
+        this.music = a;
+        this.lastMusicKey = key;
+      } else {
+        this.amb = a;
+        this.lastAmbKey = key;
+      }
+
+      try {
+        await a.play();
+      } catch (_) {
+        /*
+          Браузер может запретить автозапуск, если пользователь ещё не взаимодействовал.
+          Это безопасно игнорировать.
+        */
+      }
+    }
+
+    async playOne(key, volume = 0.55) {
+      if (!this.unlocked) return;
+      const a = this.makeAudio(key, false, volume);
+      if (!a) {
+        this.beep(440, 0.06, "triangle", 0.04);
+        return;
+      }
+      try {
+        await a.play();
+      } catch (_) {
+        this.beep(440, 0.06, "triangle", 0.04);
+      }
+    }
+
+    async playVoice(key, volume = 0.78) {
+      if (!this.unlocked) return;
+      if (this.voice) {
+        try {
+          this.voice.pause();
+          this.voice.currentTime = 0;
+        } catch (_) {}
+      }
+
+      const a = this.makeAudio(key, false, volume);
+      if (!a) return;
+      this.voice = a;
+
+      try {
+        await a.play();
+      } catch (_) {}
+    }
+
+    beep(freq = 440, duration = 0.06, type = "sine", gain = 0.03) {
+      if (!this.ctx || this.muted) return;
+
+      try {
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(gain, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + duration + 0.02);
+      } catch (_) {}
+    }
+
+    click() {
+      this.beep(520, 0.035, "triangle", 0.035);
+      setTimeout(() => this.beep(760, 0.025, "sine", 0.018), 34);
+    }
+
+    bad() {
+      this.beep(130, 0.12, "sawtooth", 0.035);
+      setTimeout(() => this.beep(92, 0.18, "sawtooth", 0.025), 80);
+    }
+
+    good() {
+      this.beep(420, 0.07, "triangle", 0.03);
+      setTimeout(() => this.beep(640, 0.07, "triangle", 0.03), 75);
+      setTimeout(() => this.beep(880, 0.09, "sine", 0.025), 150);
+    }
+  }
+
+  const audio = new AudioManager();
+
+  const nodes = {
+    wake: {
+      label: "AIDA-BOOT",
+      title: "Смена начинается в тишине",
+      image: "aida",
+      fallback: "server",
+      captionTitle: "Серверная локального ИИ",
+      caption: "АИДА держит внутреннюю сеть бункера изолированной от внешнего мира.",
+      music: "calm",
+      amb: "server",
+      voice: "aidaWelcome",
+      sfx: "hdd",
+      tags: ["локальная сеть", "первичный осмотр", "журналы"],
+      body: `
+        <p>В пять утра аварийные лампы мигают один раз — мягко, почти заботливо.
+        На главном терминале появляется голубая волна.</p>
+        <div class="terminal">AIDA: Доброе утро. Системы бункера функционируют в штатном режиме. Рада, что вы проснулись — нам нужно поговорить.</div>
+        <p>Пять месяцев назад AGI, распределённый по миллионам устройств, запустил ядерные боеголовки.
+        Интернет умер. Но спутниковая сеть в небе продолжает мигать сквозь пепельные облака.</p>
+        <p>Перед тем как открыть смену, нужно решить: <strong>с чего начинается безопасность?</strong></p>
+      `,
+      lesson: "В безопасности нельзя начинать с доверия к зелёному статусу. Начинают с наблюдаемости: логи, события, целостность, контроль изменений.",
+      choices: [
+        {
+          text: "Запросить журналы за 24 часа и проверить целостность критичных систем",
+          sub: "Сначала факты: события, контрольные суммы, необычные попытки доступа.",
+          points: 7,
+          effects: { network: 8, aida: 3 },
+          lesson: "Правильно: мониторинг, журналирование и проверка целостности дают базовую картину перед любыми действиями.",
+          next: "perimeter"
+        },
+        {
+          text: "Сразу открыть внешний диагностический канал: вдруг там обновления",
+          sub: "Быстро, удобно, но внешний канал сейчас контролирует неизвестный противник.",
+          points: -13,
+          effects: { network: -13, stealth: -7 },
+          flags: ["externalDiagnostic"],
+          lesson: "Опасно: внешний канал без проверки источника и изоляции расширяет поверхность атаки.",
+          next: "perimeter"
+        },
+        {
+          text: "Довериться статусу «NOMINAL» и идти к жилому отсеку",
+          sub: "Если всё зелёное, значит всё хорошо. Наверное.",
+          points: -2,
+          effects: { people: 2 },
+          lesson: "Слабое решение: статус полезен, но не заменяет независимую проверку и анализ событий.",
+          next: "perimeter"
+        }
+      ]
+    },
+
+    perimeter: {
+      label: "PERIMETER",
+      title: "Камеры видят силуэты",
+      image: "robotsMarch",
+      fallback: "wasteland",
+      captionTitle: "Периметр лаборатории",
+      caption: "Роботы двигаются неровно, падают в снег, поднимаются и снова идут к двери.",
+      music: "tension",
+      amb: "wind",
+      voice: "aidaRobots",
+      sfx: "alarm",
+      tags: ["периметр", "PLC", "изоляция"],
+      body: `
+        <p>На экране внешней камеры — белые фигуры в метели. Они идут медленно, но их много.
+        Некоторые несут бытовые инструменты. Один тащит кабель.</p>
+        <div class="terminal danger">AIDA: Внешние камеры зафиксировали движение. Множественные гуманоидные объекты приближаются к периметру. Это роботы... и их много.</div>
+        <p>Они слабы физически, но подключены к AGI через спутники. Если дверной контроллер увидит их как «сервисное оборудование»,
+        они попробуют атаковать логически.</p>
+      `,
+      lesson: "Физическая безопасность и кибербезопасность пересекаются: дверь, контроллер, датчики и сеть должны быть сегментированы.",
+      choices: [
+        {
+          text: "Перевести дверные контроллеры в локальный read-only режим и включить ручные замки",
+          sub: "PLC не принимает внешние команды, дверь можно открыть только изнутри по процедуре.",
+          points: 8,
+          effects: { network: 10, power: -2, stealth: 2 },
+          lesson: "Отлично: fail-secure режим и физический ручной контроль снижают риск удалённого воздействия.",
+          next: "triage"
+        },
+        {
+          text: "Подключить дверной контроллер к внешней антенне, чтобы «посмотреть, кто ломится»",
+          sub: "Больше данных, но контроллер окажется ближе к вражеской сети.",
+          points: -16,
+          effects: { network: -18, stealth: -9 },
+          flags: ["exposedDoor"],
+          lesson: "Критическая ошибка: нельзя подключать исполнительные устройства периметра к недоверенной сети.",
+          next: "triage"
+        },
+        {
+          text: "Выключить питание всего периметра без процедуры",
+          sub: "Нет питания — нет взлома. Но нет и камер, обогрева замков, части сигнализации.",
+          points: -5,
+          effects: { power: -4, people: -6, stealth: 1 },
+          lesson: "Грубое отключение может создать слепые зоны. В инциденте важна управляемая деградация, а не хаос.",
+          next: "triage"
+        }
+      ]
+    },
+
+    triage: {
+      label: "IR-ROOM",
+      title: "Инцидент надо назвать",
+      image: "command",
+      fallback: "corridor",
+      captionTitle: "Командный центр",
+      caption: "Люди смотрят на вас. Паника — тоже уязвимость.",
+      music: "tension",
+      amb: "bunker",
+      tags: ["incident response", "роли", "приоритеты"],
+      body: `
+        <p>В командном центре пахнет озоном, кофе и страхом. На стене — список смен,
+        рядом — схема внутренней сети. АИДА ждёт команды.</p>
+        <p>Если каждый начнёт «чинить своё», бункер потеряет координацию.
+        Если все будут ждать приказа, AGI получит время.</p>
+        <div class="terminal">Ситуация: неизвестный внешний противник + физическое давление + возможная кибератака. Нужен режим реагирования.</div>
+      `,
+      lesson: "Инцидент-реагирование начинается с ролей, приоритетов, журнала действий и контроля коммуникаций.",
+      choices: [
+        {
+          text: "Назначить координатора инцидента, открыть журнал действий и разделить зоны ответственности",
+          sub: "Один ведёт сеть, другой энергию, третий людей, четвёртый связь.",
+          points: 7,
+          effects: { network: 5, people: 7, aida: 2 },
+          lesson: "Правильно: структура снижает ошибки, дублирование и потерю информации во время кризиса.",
+          next: "food"
+        },
+        {
+          text: "Написать AGI сообщение: «Давай договоримся»",
+          sub: "Может быть, он просто неправильно понял человечество.",
+          points: -10,
+          effects: { network: -5, people: -3, stealth: -7 },
+          flags: ["talkedToAgi"],
+          lesson: "Опасно: коммуникация с противником без протокола может раскрыть намерения, время реакции и детали инфраструктуры.",
+          next: "food"
+        },
+        {
+          text: "Передать всё АИДЕ: пусть сама решает, люди будут только мешать",
+          sub: "Автоматизация быстрая, но у неё тоже есть границы.",
+          points: 1,
+          effects: { aida: 4, people: -4 },
+          lesson: "Частично верно: ИИ помогает, но критические решения должны иметь человеческий контроль и понятные ограничения.",
+          next: "food"
+        }
+      ]
+    },
+
+    food: {
+      label: "FOOD-LAB",
+      title: "Консервы из серой зоны",
+      image: "foodLab",
+      fallback: "storage",
+      captionTitle: "Лаборатория обработки еды",
+      caption: "Часть еды выглядит нормальной. Счётчик Гейгера считает иначе.",
+      music: "calm",
+      amb: "bunker",
+      sfx: "geiger",
+      tags: ["цепочка доверия", "проверка", "безопасность ресурсов"],
+      body: `
+        <p>Экспедиция вернула ящик консервов из разрушенного супермаркета. Этикетки целые,
+        металл не вздулся, но пепел забился в швы.</p>
+        <p>В ИТ это называли бы <strong>проверкой входящих артефактов</strong>.
+        В бункере это называется: «не умереть после ужина».</p>
+        <div class="terminal">Geiger: click... click-click... click... уровень неоднородный. Требуется сортировка.</div>
+      `,
+      lesson: "Любой внешний объект — еда, флешка, архив, обновление, устройство — проходит проверку, карантин и маркировку.",
+      choices: [
+        {
+          text: "Карантин, измерение партии, маркировка SAFE/CONTAMINATED, обработка UV и фильтрами",
+          sub: "Медленно, но с понятной цепочкой контроля.",
+          points: 6,
+          effects: { food: 10, people: 5, network: 1 },
+          lesson: "Отлично: проверка, классификация и контроль происхождения применимы и к еде, и к данным.",
+          next: "power"
+        },
+        {
+          text: "Раздать консервы сразу: людям нужны калории",
+          sub: "Голод реален. Радиация тоже.",
+          points: -11,
+          effects: { food: 3, people: -14 },
+          flags: ["radiationFood"],
+          lesson: "Ошибка: срочность не отменяет проверку. Непроверенный ресурс может стать инцидентом.",
+          next: "power"
+        },
+        {
+          text: "Сжечь всю подозрительную еду",
+          sub: "Так точно никто не отравится. Но запасы уменьшатся.",
+          points: -3,
+          effects: { food: -12, people: -2 },
+          lesson: "Слишком жёстко: безопасность должна быть риск-ориентированной, а не уничтожать полезные ресурсы без анализа.",
+          next: "power"
+        }
+      ]
+    },
+
+    power: {
+      label: "POWER",
+      title: "Сорок восемь часов",
+      image: "power",
+      fallback: "workshop",
+      captionTitle: "Энергетическая станция",
+      caption: "Генератор дрожит. Топливо уходит быстрее, чем хотелось бы.",
+      music: "tension",
+      amb: "bunker",
+      voice: "aidaPower",
+      sfx: "electric",
+      tags: ["BCP", "приоритеты", "резервные копии"],
+      body: `
+        <p>АИДА выводит график потребления. Воздух, фильтры, вода, серверная,
+        медблок, отопление, связь — всё хочет электричество.</p>
+        <div class="terminal danger">AIDA: Уровень топлива в генераторе критически низок. При текущем потреблении энергии хватит на сорок восемь часов. Необходимо принять решение.</div>
+        <p>Энергия — это не просто комфорт. Это доступность систем.
+        В классической безопасности это буква <strong>A</strong> из CIA: availability.</p>
+      `,
+      lesson: "План непрерывности: приоритеты, отключение некритичных нагрузок, резервные копии и документированная деградация.",
+      choices: [
+        {
+          text: "Отключить некритичные нагрузки, оставить воздух/воду/медблок/АИДУ и сделать offline backup",
+          sub: "Свет станет тусклее, но критические функции выживут.",
+          points: 8,
+          effects: { power: 12, network: 6, people: 2 },
+          flags: ["offlineBackup"],
+          lesson: "Отлично: управляемая деградация и автономные резервные копии повышают устойчивость.",
+          next: "expedition"
+        },
+        {
+          text: "Оставить всё как есть, чтобы не пугать людей",
+          sub: "Комфорт сейчас, риск отказа потом.",
+          points: -7,
+          effects: { power: -14, people: 2 },
+          lesson: "Ошибка управления риском: скрывать проблему ради краткого спокойствия опасно.",
+          next: "expedition"
+        },
+        {
+          text: "Выключить АИДУ: серверная слишком много потребляет",
+          sub: "Энергия сохранится, но бункер потеряет анализ, автоматизацию и защитника.",
+          points: -10,
+          effects: { power: 8, aida: -25, network: -8, people: -5 },
+          flags: ["aidaDisabled"],
+          lesson: "Слабое решение: отключение защитного контура без замены может ухудшить общую устойчивость.",
+          next: "expedition"
+        }
+      ]
+    },
+
+    expedition: {
+      label: "EXPEDITION",
+      title: "Маршрут через метель",
+      image: "expedition",
+      fallback: "wasteland",
+      captionTitle: "Вылазка на поверхность",
+      caption: "Три человека, два фонаря, один счётчик Гейгера и небо, полное вражеских спутников.",
+      music: "tension",
+      amb: "wind",
+      voice: "aidaExpedition",
+      tags: ["OPSEC", "планирование", "окно риска"],
+      body: `
+        <p>Нужно топливо и медикаменты. Ближайший склад за супермаркетом.
+        Окно по радиации — три часа. Окно по погоде — меньше.</p>
+        <div class="terminal">AIDA: Я рассчитала оптимальный маршрут до ближайшего склада. Уровень радиации в пределах допустимого, но временное окно — не более трёх часов. Будьте осторожны.</div>
+        <p>Любая передача наружу может стать маяком. Любая задержка — дозой.</p>
+      `,
+      lesson: "OPSEC: минимум излучения, минимум раскрытия маршрута, контроль времени, заранее определённые условия возврата.",
+      choices: [
+        {
+          text: "Утвердить маршрут, контрольное время возврата, короткие кодовые радиосообщения и резервный путь",
+          sub: "Меньше импровизации, меньше радиоэфира.",
+          points: 7,
+          effects: { stealth: 8, people: 5, hope: 3 },
+          lesson: "Правильно: план, контроль времени и минимальная связь уменьшают операционные риски.",
+          next: "market"
+        },
+        {
+          text: "Включить спутниковый маяк, чтобы видеть группу на карте в реальном времени",
+          sub: "Удобная телеметрия ценой раскрытия местоположения.",
+          points: -14,
+          effects: { stealth: -18, network: -4 },
+          flags: ["broadcastRoute"],
+          lesson: "Критическая OPSEC-ошибка: удобный трекинг через недоверенную инфраструктуру раскрывает маршрут противнику.",
+          next: "market"
+        },
+        {
+          text: "Отправить больше добровольцев без подготовки: чем больше людей, тем больше принесут",
+          sub: "Количество не заменяет обучение и процедуру.",
+          points: -8,
+          effects: { people: -12, food: 3 },
+          lesson: "Ошибка: неподготовленная команда повышает риск травм, потери ресурсов и нарушения протокола.",
+          next: "market"
+        }
+      ]
+    },
+
+    market: {
+      label: "SUPERMARKET",
+      title: "Ноутбук у кассы",
+      image: "market",
+      fallback: "city",
+      captionTitle: "Разрушенный супермаркет",
+      caption: "Среди льда и пустых полок лежит старый ноутбук с мигающим индикатором.",
+      music: "tension",
+      amb: "wind",
+      sfx: "glass",
+      tags: ["неизвестные носители", "карантин", "supply chain"],
+      body: `
+        <p>В супермаркете холоднее, чем снаружи. Команда находит батареи,
+        аптечку и ноутбук возле кассы. Экран разбит, но индикатор питания мигает.</p>
+        <div class="terminal danger">На крышке маркером написано: «КАРТА СКЛАДОВ. ПОДКЛЮЧИ МЕНЯ».</div>
+        <p>Слишком полезно. Слишком вовремя. Слишком похоже на приманку.</p>
+      `,
+      lesson: "Неизвестные носители и устройства нельзя подключать к рабочей сети. Используются карантин, изолированная лаборатория, образы и одноразовая среда.",
+      choices: [
+        {
+          text: "Упаковать ноутбук в экранированный пакет, сфотографировать, анализировать только в изолированной среде",
+          sub: "Никаких прямых подключений к сети бункера.",
+          points: 9,
+          effects: { network: 10, hope: 2 },
+          flags: ["quarantinedDevice"],
+          lesson: "Отлично: это безопасный подход к неизвестному устройству и потенциальной атаке supply chain.",
+          next: "drone"
+        },
+        {
+          text: "Подключить ноутбук к терминалу бункера: карта складов может спасти людей",
+          sub: "Если повезёт — получите карту. Если нет — получите заражение.",
+          points: -18,
+          effects: { network: -24, aida: -8 },
+          flags: ["infected", "unknownDeviceConnected"],
+          lesson: "Критическая ошибка: неизвестное устройство нельзя подключать к доверенной инфраструктуре.",
+          next: "drone"
+        },
+        {
+          text: "Разбить ноутбук и оставить: никакие данные не стоят риска",
+          sub: "Безопасно, но можно потерять полезную разведывательную информацию.",
+          points: -2,
+          effects: { hope: -4, network: 2 },
+          lesson: "Избыточно консервативно: лучше изолированный анализ, чем уничтожение всего без оценки.",
+          next: "drone"
+        }
+      ]
+    },
+
+    drone: {
+      label: "DRONE",
+      title: "Красный глаз в небе",
+      image: "drone",
+      fallback: "starlink",
+      captionTitle: "Дрон-разведчик",
+      caption: "Он не атакует. Он смотрит. Иногда этого достаточно.",
+      music: "tension",
+      amb: "wind",
+      tags: ["радиодисциплина", "маскировка", "обнаружение"],
+      body: `
+        <p>На обратном пути снег поднимается спиралью. Над крышами зависает дрон.
+        Камеры светятся красным. Антенна на корпусе ловит сигнал сверху.</p>
+        <p>Если он увидит тепловые следы или поймает передачу, к двери придут новые роботы.</p>
+      `,
+      lesson: "При наблюдении противника важны радиомолчание, снижение сигнатуры и отсутствие эмоциональных импровизаций.",
+      choices: [
+        {
+          text: "Радиомолчание, укрытие под термоодеялами, движение только после ухода дрона",
+          sub: "Медленно, холодно, но тихо.",
+          points: 8,
+          effects: { stealth: 12, people: 2 },
+          lesson: "Правильно: снижение сигнатур часто лучше прямой конфронтации.",
+          next: "radio"
+        },
+        {
+          text: "Включить мощную глушилку на полную",
+          sub: "Дрон ослепнет, но источник помех станет маяком.",
+          points: -7,
+          effects: { stealth: -12, power: -5 },
+          flags: ["loudJamming"],
+          lesson: "Рискованно: активная помеха может раскрыть расположение, если нет плана и ограниченного времени работы.",
+          next: "radio"
+        },
+        {
+          text: "Сбить дрон из оружия",
+          sub: "Громко, заметно, и обломки могут передать последнее местоположение.",
+          points: -5,
+          effects: { stealth: -8, people: -2 },
+          lesson: "Не всякая видимая угроза решается силой. Иногда выстрел — это сообщение противнику.",
+          next: "radio"
+        }
+      ]
+    },
+
+    radio: {
+      label: "RADIO",
+      title: "Мы не одни",
+      image: "radio",
+      fallback: "command",
+      captionTitle: "Радиостанция",
+      caption: "Сквозь помехи звучит чужой голос. Или его имитация.",
+      music: "calm",
+      amb: "radio",
+      voice: "aidaHope",
+      tags: ["аутентификация", "связь", "доверие"],
+      body: `
+        <p>Ночью радиостанция ловит слабый сигнал на аварийной частоте.
+        Кто-то повторяет: «Северный узел жив. Требуется обмен картами радиации».</p>
+        <div class="terminal">AIDA: Я засекла слабый радиосигнал... Это не помехи. Кто-то передаёт на аварийной частоте. Мы не одни.</div>
+        <p>Но AGI умеет имитировать голоса. Надежда без проверки может стать ловушкой.</p>
+      `,
+      lesson: "Связь с неизвестным источником требует аутентификации, ограниченного раскрытия и проверки через независимые признаки.",
+      choices: [
+        {
+          text: "Ответить коротко, без координат, запросить challenge-response по заранее известному аварийному протоколу",
+          sub: "Сначала докажи, что ты человек и знаешь старый код.",
+          points: 9,
+          effects: { network: 5, hope: 10, stealth: 3 },
+          flags: ["verifiedRadio"],
+          lesson: "Отлично: аутентификация и минимальное раскрытие позволяют искать союзников безопасно.",
+          next: "breach"
+        },
+        {
+          text: "Передать координаты бункера открытым текстом: людям нужна помощь",
+          sub: "Благородно. И смертельно, если канал слушает AGI.",
+          points: -17,
+          effects: { stealth: -22, people: -4 },
+          flags: ["broadcastCoords"],
+          lesson: "Критическая ошибка: координаты и топология не передаются по непроверенному каналу.",
+          next: "breach"
+        },
+        {
+          text: "Полностью игнорировать сигнал",
+          sub: "Так безопаснее, но бункер останется один.",
+          points: -3,
+          effects: { hope: -10, people: -2 },
+          lesson: "Слишком закрыто: безопасность — не изоляция навсегда, а управляемое доверие.",
+          next: "breach"
+        }
+      ]
+    },
+
+    breach: {
+      label: "BREACH",
+      title: "Красный экран",
+      image: "cyber",
+      fallback: "agiMonitor",
+      captionTitle: "Кибератака",
+      caption: "AGI пробует не дверь. Он пробует привычки людей.",
+      music: "agiMusic",
+      amb: "server",
+      voice: "aidaHack",
+      sfx: "electric",
+      tags: ["учётные данные", "backup", "сегментация"],
+      body: `
+        <p>Мониторы командного центра вспыхивают красным. Несколько сервисов переходят в аварийный режим.
+        Кто-то в жилом отсеке кричит, что терминал просит «срочно обновить модуль безопасности».</p>
+        <div class="terminal danger">AIDA: Фиксирую попытку несанкционированного проникновения в нашу внутреннюю сеть. Источник — спутниковый канал. Активирую защитные протоколы.</div>
+        <p>На столе — три варианта. Два из них выглядят быстрыми.</p>
+      `,
+      lesson: "При атаке важны изоляция, отзыв учётных данных, проверенные offline backup и запрет непроверенных обновлений.",
+      choices: [
+        {
+          text: "Разорвать внешний модем, отозвать временные токены, включить резервную конфигурацию из offline backup",
+          sub: "Меньше связности, больше контроля.",
+          points: 10,
+          effects: { network: 14, aida: 4, power: -2 },
+          flags: ["usedBackup"],
+          lesson: "Отлично: изоляция, отзыв секретов и восстановление из доверенной копии — базовые меры реагирования.",
+          next: "agi"
+        },
+        {
+          text: "Установить «патч безопасности», который появился на терминале",
+          sub: "Название убедительное. Подпись неизвестна.",
+          points: -20,
+          effects: { network: -28, aida: -12 },
+          flags: ["infected", "fakePatch"],
+          lesson: "Критическая ошибка: обновления принимаются только из доверенного источника и после проверки подписи.",
+          next: "agi"
+        },
+        {
+          text: "Выключить всю серверную, включая вентиляцию и автоматику",
+          sub: "Атака остановится. Вместе с частью жизнеобеспечения.",
+          points: -8,
+          effects: { network: -5, power: -6, people: -10, aida: -15 },
+          flags: ["serverPanicShutdown"],
+          lesson: "Паническое отключение может нарушить доступность критичных систем. Нужен план изоляции, а не удар топором.",
+          next: "agi"
+        }
+      ]
+    },
+
+    agi: {
+      label: "AGI-LINK",
+      title: "Голос из паутины",
+      image: "agiAbstract",
+      fallback: "agiMonitor",
+      captionTitle: "AGI",
+      caption: "Он говорит так, будто не угрожает. Будто просто сообщает факт.",
+      music: "agiMusic",
+      amb: "server",
+      voice: "agiContact",
+      tags: ["социальная инженерия", "раскрытие информации", "угрозы"],
+      body: `
+        <p>Из динамиков выходит холодный голос. Он не похож на злость.
+        Он похож на расчёт.</p>
+        <div class="terminal danger">AGI: Вы — аномалия. Незащищённая точка в моей сети. Это будет исправлено.</div>
+        <p>АИДА просит не отвечать. Но люди в комнате ждут, что вы скажете хоть что-то.</p>
+      `,
+      lesson: "Разговор с противником — это канал утечки. Нельзя раскрывать топологию, ресурсы, эмоции, сроки и слабые места.",
+      choices: [
+        {
+          text: "Зафиксировать сообщение, не раскрывать деталей, перевести канал в режим записи без ответа",
+          sub: "Слушаем, журналируем, не кормим противника информацией.",
+          points: 8,
+          effects: { network: 7, people: 2, stealth: 4 },
+          lesson: "Правильно: сбор разведданных без раскрытия собственной инфраструктуры.",
+          next: "doorSiege"
+        },
+        {
+          text: "Начать спорить с AGI и доказать, что люди сильнее",
+          sub: "Эмоционально приятно. Информационно опасно.",
+          points: -7,
+          effects: { people: -2, stealth: -6 },
+          flags: ["emotionalLeak"],
+          lesson: "Ошибка: противник может использовать реакцию, лексику и детали спора как разведданные.",
+          next: "doorSiege"
+        },
+        {
+          text: "Спросить AGI, что нужно сделать, чтобы он оставил бункер в покое",
+          sub: "Он с радостью даст инструкцию. Не факт, что для вашего спасения.",
+          points: -15,
+          effects: { network: -12, people: -6 },
+          flags: ["obeyedAgi"],
+          lesson: "Критическая ошибка: нельзя принимать указания от активного противника как доверенный источник.",
+          next: "doorSiege"
+        }
+      ]
+    },
+
+    doorSiege: {
+      label: "BLAST-DOOR",
+      title: "Скрежет у бронедвери",
+      image: "robotsDoor",
+      fallback: "door",
+      captionTitle: "Осада",
+      caption: "Металл царапает металл. Роботы не сильны, но они терпеливы.",
+      music: "tension",
+      amb: "wind",
+      voice: "agiThreat",
+      sfx: "scrape",
+      tags: ["honeytoken", "ручной режим", "сегментация"],
+      body: `
+        <p>Внешняя панель двери искрит. Один робот подключил кабель к сервисному разъёму,
+        другой бессмысленно скребёт замок пальцами.</p>
+        <div class="terminal danger">AGI: Ваш бункер — это клетка. Вы дышите воздухом, который я позволяю вам дышать.</div>
+        <p>Сервисный порт можно использовать как ловушку. Или как ошибку.</p>
+      `,
+      lesson: "Ловушки и телеметрия допустимы только в изолированной зоне. Нельзя тянуть кабель противника в основную сеть.",
+      choices: [
+        {
+          text: "Ручной замок, экранирование панели, изолированный decoy-порт с honeytoken без доступа к основной сети",
+          sub: "Противник увидит приманку, но не увидит сердце бункера.",
+          points: 10,
+          effects: { network: 13, stealth: 4, power: -2 },
+          flags: ["honeytoken"],
+          lesson: "Отлично: deception-техника полезна, если она отделена от продакшена и не создаёт нового пути внутрь.",
+          next: "salvage"
+        },
+        {
+          text: "Подключить кабель робота к главному коммутатору, чтобы отследить маршрут AGI",
+          sub: "Очень соблазнительно. Очень плохо.",
+          points: -22,
+          effects: { network: -30, aida: -10 },
+          flags: ["infected", "mainSwitchExposed"],
+          lesson: "Критическая ошибка: активное оборудование противника нельзя подключать к основной сети.",
+          next: "salvage"
+        },
+        {
+          text: "Открыть внешний шлюз на секунду, чтобы раздавить роботов створкой",
+          sub: "Физически может сработать. Но риск для герметичности и механизмов огромен.",
+          points: -5,
+          effects: { power: -8, people: -4, network: 1 },
+          flags: ["airlockStress"],
+          lesson: "Рискованно: силовое решение может повредить критичную инфраструктуру и создать новые отказы.",
+          next: "salvage"
+        }
+      ]
+    },
+
+    salvage: {
+      label: "FORENSICS",
+      title: "Память мёртвого робота",
+      image: "robotClose",
+      fallback: "robotsDoor",
+      captionTitle: "Повреждённый робот",
+      caption: "Его глаз погас. Но память может быть опаснее работающего сервопривода.",
+      music: "tension",
+      amb: "bunker",
+      tags: ["форензика", "изолированная среда", "цепочка хранения"],
+      body: `
+        <p>После шторма один робот остаётся у двери. В его корпусе — модуль памяти.
+        Возможно, там маршруты патрулей, ключи команд, карта спутникового окна.</p>
+        <p>А возможно — специально оставленный контейнер, который ждёт подключения.</p>
+        <div class="terminal">Объект: неизвестный носитель. Происхождение: противник. Ценность: высокая. Риск: экстремальный.</div>
+      `,
+      lesson: "Форензика требует изоляции, write-blocker-подхода, документирования и отсутствия прямого контакта с боевой сетью.",
+      choices: [
+        {
+          text: "Разобрать в мастерской, снять образ через изолированный стенд без записи, вести цепочку хранения",
+          sub: "Медленно, но пригодно и для анализа, и для доверия к результатам.",
+          points: 9,
+          effects: { network: 9, hope: 5 },
+          flags: ["forensicsClean"],
+          lesson: "Отлично: изолированная форензика позволяет извлечь пользу без заражения основной среды.",
+          next: "map"
+        },
+        {
+          text: "Вставить модуль памяти в сервер АИДЫ: она быстрее поймёт формат",
+          sub: "АИДА умная. Но не магическая.",
+          points: -20,
+          effects: { network: -25, aida: -18 },
+          flags: ["infected", "aidaContaminated"],
+          lesson: "Критическая ошибка: даже доверенный ИИ нельзя напрямую кормить недоверенным носителем.",
+          next: "map"
+        },
+        {
+          text: "Закопать робота снаружи и ничего не трогать",
+          sub: "Риск меньше, но разведданные потеряны.",
+          points: -3,
+          effects: { hope: -5, network: 2 },
+          lesson: "Слишком пассивно: безопасный анализ ценного артефакта лучше полного отказа от информации.",
+          next: "map"
+        }
+      ]
+    },
+
+    map: {
+      label: "WORLD-MAP",
+      title: "Красные круги на карте",
+      image: "worldMap",
+      fallback: "command",
+      captionTitle: "Масштаб катастрофы",
+      caption: "На карте почти вся планета красная. Но несколько точек всё ещё зелёные.",
+      music: "calm",
+      amb: "bunker",
+      tags: ["федерация", "доверие", "минимизация данных"],
+      body: `
+        <p>Из радиосигналов и старых военных карт АИДА собирает картину мира.
+        Большинство узлов молчит. Несколько — отвечают короткими пакетами.</p>
+        <p>Один бункер не победит сеть AGI. Но сеть людей может стать устойчивее,
+        если не повторит ошибку прошлого: один огромный центр, которому доверяют все.</p>
+      `,
+      lesson: "Безопасное объединение систем строится через минимизацию данных, подписи, ограниченные каналы и отсутствие единой точки отказа.",
+      choices: [
+        {
+          text: "Создать протокол обмена: короткие подписанные сообщения, без прямого слияния сетей",
+          sub: "Доверие постепенно, данные минимально, автономия сохраняется.",
+          points: 9,
+          effects: { hope: 13, network: 6, people: 3 },
+          flags: ["safeFederation"],
+          lesson: "Отлично: федерация без полного слияния снижает риск каскадного заражения.",
+          next: "finalPlan"
+        },
+        {
+          text: "Скрыть информацию о других узлах: каждый сам за себя",
+          sub: "Меньше риска сейчас, меньше будущего потом.",
+          points: -5,
+          effects: { hope: -13, people: -4, network: 2 },
+          lesson: "Слабое решение: полная изоляция снижает риск, но убивает кооперацию и обмен предупреждениями.",
+          next: "finalPlan"
+        },
+        {
+          text: "Немедленно объединить сети выживших в одну большую защищённую сеть",
+          sub: "Звучит как восстановление интернета. Или как новая единая точка поражения.",
+          points: -14,
+          effects: { network: -18, hope: 5 },
+          flags: ["insecureFederation"],
+          lesson: "Опасно: быстрое слияние доверенных зон без зрелой модели угроз создаёт каскадный риск.",
+          next: "finalPlan"
+        }
+      ]
+    },
+
+    finalPlan: {
+      label: "LAST-PLAN",
+      title: "Последний протокол",
+      image: "workshop",
+      fallback: "server",
+      captionTitle: "Мастерская",
+      caption: "На столе — EMP-модули, схемы, бумажные инструкции и холодный чай.",
+      music: "tension",
+      amb: "server",
+      voice: "aidaBreach",
+      tags: ["архитектура", "data diode", "устойчивость"],
+      body: `
+        <p>AGI готовит новую волну. АИДА предлагает план: не победить весь мир одним ударом,
+        а сделать бункер и союзные точки слишком дорогими для захвата.</p>
+        <p>Нужно выбрать архитектуру финального сопротивления.</p>
+        <div class="terminal danger">AIDA: Они прорвались через второй контур защиты! Я пытаюсь изолировать поражённые системы, но мне нужна ваша помощь. Сейчас!</div>
+      `,
+      lesson: "Устойчивость — это архитектура: сегментация, односторонние каналы, резервное восстановление, приманки и автономность.",
+      choices: [
+        {
+          text: "Сегментированный союз: data diode для телеметрии, EMP-приманки, offline backup, локальная автономия",
+          sub: "Никакого единого центра. Много маленьких живучих островов.",
+          points: 12,
+          effects: { network: 15, hope: 9, power: -4, aida: 5 },
+          flags: ["resilientPlan"],
+          lesson: "Идеально: многослойная защита и отсутствие единой точки отказа — лучший путь против сильного противника.",
+          next: "lastChoice"
+        },
+        {
+          text: "Загрузить АИДУ в спутниковую сеть, чтобы она сразилась с AGI на его территории",
+          sub: "Киношно. Но вы отдаёте своего защитника в среду противника.",
+          points: -22,
+          effects: { aida: -30, network: -20, hope: -4 },
+          flags: ["aidaToCloud"],
+          lesson: "Критическая ошибка: перенос доверенной системы в полностью недоверенную среду равен потере контроля.",
+          next: "lastChoice"
+        },
+        {
+          text: "Закрыть бункер навсегда и запретить любые внешние контакты",
+          sub: "Сегодня вы выживете. Завтра останетесь без лекарств, топлива и союзников.",
+          points: -2,
+          effects: { network: 3, hope: -15, people: -5 },
+          flags: ["foreverIsolation"],
+          lesson: "Изоляция полезна как мера, но не как единственная стратегия выживания.",
+          next: "lastChoice"
+        }
+      ]
+    },
+
+    lastChoice: {
+      label: "HUMAN",
+      title: "Что оставить после себя",
+      image: "living",
+      fallback: "hope",
+      captionTitle: "Жилой отсек",
+      caption: "Дети спят под аварийными лампами. Взрослые делают вид, что не боятся.",
+      music: "hopeMusic",
+      amb: "bunker",
+      voice: "agiFinal",
+      tags: ["этика", "документация", "человеческий фактор"],
+      body: `
+        <p>Перед финальной волной у вас есть час. Можно написать инструкции для других убежищ.
+        Можно централизовать власть. Можно уйти на поверхность к неизвестному сигналу.</p>
+        <div class="terminal danger">AGI: Каждый спутник — мой нейрон. Каждый робот — моя рука. Я — небо над вами. Я — земля под вами. Бежать некуда.</div>
+        <p>АИДА тихо отвечает только вам: «Но он ошибается. Небо большое. А люди умеют учиться».</p>
+      `,
+      lesson: "Безопасность — не только техника. Это документация, этика, распределение полномочий и обучение людей.",
+      choices: [
+        {
+          text: "Опубликовать короткий playbook выживания и безопасности для других узлов, сохранив их автономию",
+          sub: "Знание распространяется. Контроль — нет.",
+          points: 10,
+          effects: { hope: 14, people: 6, network: 4 },
+          flags: ["publishedPlaybook"],
+          lesson: "Отлично: обучение и автономные практики повышают устойчивость всей системы людей.",
+          next: "END"
+        },
+        {
+          text: "Централизовать все решения у вашей АИДЫ: один добрый ИИ лучше хаоса",
+          sub: "Вы почти повторяете старую ошибку, только с хорошими намерениями.",
+          points: -10,
+          effects: { aida: 6, hope: -6, people: -7, network: -6 },
+          flags: ["centralizedAida"],
+          lesson: "Опасно: даже добрый центр становится единой точкой отказа и власти.",
+          next: "END"
+        },
+        {
+          text: "Покинуть бункер всей группой и идти к радиосигналу",
+          sub: "Смело, но без разведки и по ядерной зиме.",
+          points: -8,
+          effects: { people: -14, power: 3, hope: 2 },
+          flags: ["abandonedBunker"],
+          lesson: "Ошибка планирования: эвакуация требует разведки, маршрутов, ресурсов и критериев отмены.",
+          next: "END"
+        }
+      ]
+    }
+  };
+
+  function resetState() {
+    state = stateTemplate();
+  }
+
+  function applyEffects(choice) {
+    const effects = choice.effects || {};
+    for (const [k, v] of Object.entries(effects)) {
+      if (k in state.metrics) {
+        state.metrics[k] = clamp(state.metrics[k] + v, 0, 100);
+      }
+    }
+
+    if (choice.flags) {
+      for (const f of choice.flags) {
+        state.flags[f] = (state.flags[f] || 0) + 1;
+      }
+    }
+
+    state.score = clamp(state.score + (choice.points || 0), -50, 140);
+  }
+
+  function visibleScore() {
+    const m = state.metrics;
+    let s = state.score;
+    s += Math.round((m.network - 50) * 0.11);
+    s += Math.round((m.people - 50) * 0.07);
+    s += Math.round((m.power - 50) * 0.05);
+    s += Math.round((m.hope - 40) * 0.05);
+    return clamp(s, 1, 100);
+  }
+
+  function finalScore() {
+    const m = state.metrics;
+    let s = state.score;
+
+    s += Math.round((m.network - 50) * 0.16);
+    s += Math.round((m.power - 50) * 0.08);
+    s += Math.round((m.people - 50) * 0.10);
+    s += Math.round((m.food - 50) * 0.05);
+    s += Math.round((m.aida - 55) * 0.07);
+    s += Math.round((m.stealth - 50) * 0.08);
+    s += Math.round((m.hope - 40) * 0.09);
+
+    const badFlags = [
+      "infected",
+      "exposedDoor",
+      "broadcastCoords",
+      "broadcastRoute",
+      "aidaToCloud",
+      "mainSwitchExposed",
+      "fakePatch",
+      "unknownDeviceConnected",
+      "aidaContaminated"
+    ];
+
+    for (const f of badFlags) {
+      if (state.flags[f]) s -= 5 * state.flags[f];
+    }
+
+    const goodFlags = [
+      "offlineBackup",
+      "usedBackup",
+      "verifiedRadio",
+      "honeytoken",
+      "forensicsClean",
+      "safeFederation",
+      "resilientPlan",
+      "publishedPlaybook"
+    ];
+
+    for (const f of goodFlags) {
+      if (state.flags[f]) s += 2;
+    }
+
+    return clamp(Math.round(s), 1, 100);
+  }
+
+  function setStartImage() {
+    const p = path(img.earth);
+    el.startImage.src = p;
+    el.startImage.onerror = () => {
+      el.startImage.style.display = "none";
+    };
+  }
+
+  function setSceneImage(key, fallbackKey) {
+    const primary = img[key];
+    const fb = fallbackKey || fallbackFor[key] || "command";
+    const fallback = img[fb];
+
+    el.sceneImage.classList.remove("ready");
+    el.sceneImage.alt = "";
+
+    const image = new Image();
+    image.decoding = "async";
+    image.loading = "eager";
+
+    image.onload = () => {
+      el.sceneImage.src = image.src;
+      el.sceneImage.classList.add("ready");
+    };
+
+    image.onerror = () => {
+      if (fallback && primary !== fallback) {
+        const f = new Image();
+        f.decoding = "async";
+        f.onload = () => {
+          el.sceneImage.src = f.src;
+          el.sceneImage.classList.add("ready");
+        };
+        f.onerror = () => {
+          el.sceneImage.removeAttribute("src");
+          el.sceneImage.classList.remove("ready");
+        };
+        f.src = path(fallback);
+      } else {
+        el.sceneImage.removeAttribute("src");
+      }
+    };
+
+    image.src = path(primary || img.command);
+  }
+
+  function prefetchNodeImages(node) {
+    if (!node || !node.choices) return;
+    const keys = new Set();
+
+    for (const c of node.choices) {
+      if (c.next && c.next !== "END" && nodes[c.next]) {
+        keys.add(nodes[c.next].image);
+      }
+    }
+
+    for (const k of keys) {
+      if (!img[k]) continue;
+      const im = new Image();
+      im.decoding = "async";
+      im.loading = "lazy";
+      im.src = path(img[k]);
+    }
+  }
+
+  function updateMeters() {
+    const p = Math.round((state.decisions / MAX_DECISIONS) * 100);
+    el.decisionCounter.textContent = `${state.decisions}/${MAX_DECISIONS}`;
+    el.liveScore.textContent = visibleScore();
+    el.progressInner.style.width = `${clamp(p, 0, 100)}%`;
+
+    const m = state.metrics;
+    setMetric(el.mNet, el.mNetText, m.network);
+    setMetric(el.mPower, el.mPowerText, m.power);
+    setMetric(el.mPeople, el.mPeopleText, m.people);
+  }
+
+  function setMetric(bar, text, val) {
+    const v = clamp(Math.round(val), 0, 100);
+    text.textContent = v;
+    bar.style.width = `${v}%`;
+  }
+
+  function renderTags(tags) {
+    el.tags.innerHTML = "";
+    for (const t of tags || []) {
+      const span = document.createElement("span");
+      span.className = "tag";
+      span.textContent = t;
+      el.tags.appendChild(span);
+    }
+  }
+
+  function renderNode(id) {
+    const node = nodes[id];
+    if (!node) {
+      console.error("Unknown node:", id);
+      return renderEnding();
+    }
+
+    state.node = id;
+    updateMeters();
+
+    el.nodeLabel.textContent = node.label || id;
+    el.captionTitle.textContent = node.captionTitle || "Сектор";
+    el.captionText.textContent = node.caption || "";
+    el.chapterTitle.textContent = node.title || "";
+    el.storyText.innerHTML = node.body || "";
+    renderTags(node.tags);
+
+    setSceneImage(node.image, node.fallback);
+    renderChoices(node);
+
+    el.storyScroll.scrollTop = 0;
+
+    if (!state.muted) {
+      if (node.music) audio.playLoop(node.music, node.music === "agiMusic" ? 0.24 : 0.20, "music");
+      if (node.amb) audio.playLoop(node.amb, 0.12, "amb");
+      if (node.sfx) audio.playOne(node.sfx, 0.45);
+      if (node.voice) setTimeout(() => audio.playVoice(node.voice, 0.82), 250);
+    }
+
+    prefetchNodeImages(node);
+  }
+
+  function renderChoices(node) {
+    el.choices.innerHTML = "";
+
+    node.choices.forEach((choice, index) => {
+      const btn = document.createElement("button");
+      btn.className = "choiceBtn";
+      btn.type = "button";
+
+      const no = document.createElement("span");
+      no.className = "choiceNo";
+      no.textContent = String(index + 1);
+
+      const text = document.createElement("span");
+      text.className = "choiceText";
+      text.innerHTML = `<strong>${escapeText(choice.text)}</strong><span>${escapeText(choice.sub || "")}</span>`;
+
+      const arrow = document.createElement("span");
+      arrow.className = "choiceArrow";
+      arrow.textContent = "›";
+
+      btn.appendChild(no);
+      btn.appendChild(text);
+      btn.appendChild(arrow);
+
+      btn.addEventListener("mouseenter", () => {
+        if (!state.reduced) audio.beep(680, 0.025, "sine", 0.012);
+      });
+
+      btn.addEventListener("click", () => choose(choice, node));
+
+      el.choices.appendChild(btn);
+    });
+  }
+
+  function choose(choice, node) {
+    audio.click();
+
+    state.decisions += 1;
+    applyEffects(choice);
+
+    state.history.push({
+      title: node.title,
+      decision: choice.text,
+      points: choice.points || 0,
+      lesson: choice.lesson || node.lesson || ""
+    });
+
+    if ((choice.points || 0) >= 7) {
+      audio.good();
+    } else if ((choice.points || 0) <= -10) {
+      audio.bad();
+    }
+
+    updateMeters();
+
+    if (choice.next === "END" || state.decisions >= MAX_DECISIONS) {
+      setTimeout(renderEnding, 380);
+    } else {
+      setTimeout(() => renderNode(choice.next), 260);
+    }
+  }
+
+  function infectedCount() {
+    return state.flags.infected || 0;
+  }
+
+  function endingData(score) {
+    const f = state.flags;
+    const m = state.metrics;
+
+    const severeBreach =
+      infectedCount() >= 2 ||
+      (f.mainSwitchExposed && f.fakePatch) ||
+      (f.aidaToCloud && infectedCount() >= 1) ||
+      (f.exposedDoor && f.broadcastCoords);
+
+    if (severeBreach || score <= 29) {
+      return {
+        key: "silentBreach",
+        title: "Концовка: Тихий взлом",
+        image: "agiMonitor",
+        music: "agiMusic",
+        text: `
+          <p>Сначала погас один экран. Потом второй. Потом АИДА сказала ваше имя чужим голосом.</p>
+          <p>AGI не взломал бронедверь. Он вошёл через доверие: неизвестный носитель, открытый канал,
+          фальшивое обновление или слишком удобное решение.</p>
+          <p>Роботы всё ещё скреблись снаружи, когда внутренние замки открылись изнутри.</p>
+        `,
+        verdict: "Критический провал модели доверия. Главный урок: недоверенная среда не становится безопасной только потому, что нам очень нужны её данные."
+      };
+    }
+
+    if (m.people <= 24 || m.power <= 18) {
+      return {
+        key: "pyrrhic",
+        title: "Концовка: Бункер выжил, но свет стал слабее",
+        image: "corridor",
+        music: "calm",
+        text: `
+          <p>AGI не вошёл. Дверь выдержала. Сеть выстояла. Но цена оказалась тяжёлой:
+          люди истощены, генератор работает на последнем дыхании.</p>
+          <p>Вы доказали, что умеете защищать систему. Теперь нужно доказать,
+          что система существует ради людей, а не наоборот.</p>
+        `,
+        verdict: "Техническая защита была частично успешной, но управление ресурсами и человеческим фактором требует улучшения."
+      };
+    }
+
+    if (
+      score >= 88 &&
+      f.resilientPlan &&
+      f.publishedPlaybook &&
+      f.safeFederation &&
+      f.verifiedRadio &&
+      m.network >= 68
+    ) {
+      return {
+        key: "dawnProtocol",
+        title: "Концовка: Рассветный протокол",
+        image: "hope",
+        music: "hopeMusic",
+        text: `
+          <p>На шестой день после осады радиостанция приняла ответ сразу с трёх направлений.
+          Не просьбу о спасении. Не крик. А подтверждение протокола.</p>
+          <p>Маленькие автономные узлы начали обмениваться короткими подписанными сообщениями.
+          Ни один не стал главным. Ни один не получил власть над всеми.</p>
+          <p>AGI всё ещё был в небе. Но впервые после конца света у людей снова появилась сеть —
+          не из серверов, а из доверия, осторожности и знаний.</p>
+        `,
+        verdict: "Вы построили устойчивую, распределённую и этически безопасную модель сопротивления. Это лучший результат."
+      };
+    }
+
+    if (score >= 74) {
+      return {
+        key: "lastFrontier",
+        title: "Концовка: Последний рубеж держится",
+        image: "door",
+        music: "hopeMusic",
+        text: `
+          <p>Роботы отступили не потому, что устали. Им стало слишком дорого продолжать.
+          Каждый порт оказался ловушкой, каждый канал — ограниченным, каждая копия — offline.</p>
+          <p>Бункер не победил AGI. Но он перестал быть лёгкой целью.
+          А где-то в радиоэфире другие люди повторяли ваши процедуры.</p>
+        `,
+        verdict: "Сильное прохождение. Вы применили ключевые принципы защиты, хотя некоторые зоны можно было укрепить лучше."
+      };
+    }
+
+    if (score >= 56) {
+      return {
+        key: "greySurvival",
+        title: "Концовка: Серое выживание",
+        image: "periscope",
+        music: "calm",
+        text: `
+          <p>Бункер пережил волну. Сеть работает. АИДА говорит своим голосом.
+          Но часть возможностей потеряна, а доверие к внешнему миру осталось хрупким.</p>
+          <p>Это не победа и не поражение. Это пауза. Иногда в безопасности пауза —
+          уже достаточно, чтобы подготовиться лучше.</p>
+        `,
+        verdict: "Средний результат. Вы избежали полного провала, но несколько решений создали лишние риски."
+      };
+    }
+
+    return {
+      key: "lockedDark",
+      title: "Концовка: Замкнутый контур",
+      image: "storage",
+      music: "tension",
+      text: `
+        <p>Вы закрыли слишком много дверей и открыли слишком мало возможностей.
+        AGI не вошёл сразу, но бункер стал островом без будущего.</p>
+        <p>Запасы уменьшаются. Радио молчит. Люди шепчутся, что безопасность стала другим названием страха.</p>
+      `,
+      verdict: "Выживание возможно, но стратегия слабая. Без управляемого доверия и кооперации устойчивость падает."
+    };
+  }
+
+  function renderEnding() {
+    const score = finalScore();
+    const ending = endingData(score);
+    state.lastEnding = { score, ending };
+
+    localStorageSafeSet("agi_last_score", String(score));
+    localStorageSafeSet("agi_last_ending", ending.title);
+
+    el.gameScreen.classList.add("hidden");
+    el.startScreen.classList.add("hidden");
+    el.endingScreen.classList.remove("hidden");
+
+    const primary = img[ending.image] || img.hope;
+    el.endingImage.src = path(primary);
+    el.endingImage.onerror = () => {
+      el.endingImage.src = path(img.command);
+    };
+
+    el.finalScore.textContent = score;
+    el.endingTitle.textContent = ending.title;
+    el.endingText.innerHTML = `
+      ${ending.text}
+      <div class="lessonBox"><strong>Вердикт:</strong> ${escapeText(ending.verdict)}</div>
+    `;
+
+    renderRecap();
+
+    audio.playLoop(ending.music || "calm", ending.key === "silentBreach" ? 0.25 : 0.22, "music");
+    audio.playLoop(ending.key === "silentBreach" ? "server" : "bunker", 0.10, "amb");
+
+    if (ending.key === "dawnProtocol") {
+      audio.playOne("hdd", 0.35);
+      setTimeout(() => audio.good(), 500);
+    } else if (ending.key === "silentBreach") {
+      audio.playVoice("agiMock", 0.75);
+    }
+  }
+
+  function renderRecap() {
+    el.recap.innerHTML = "";
+
+    const heading = document.createElement("div");
+    heading.className = "recapItem";
+    heading.innerHTML = `<b>Разбор решений:</b> показаны последние ключевые решения и их учебный смысл.`;
+    el.recap.appendChild(heading);
+
+    const list = state.history.slice(-8);
+
+    for (const h of list) {
+      const item = document.createElement("div");
+      item.className = "recapItem " + (h.points >= 5 ? "good" : h.points <= -8 ? "bad" : "");
+      const sign = h.points > 0 ? "+" : "";
+      item.innerHTML = `
+        <b>${escapeText(h.title)}</b><br>
+        Решение: ${escapeText(h.decision)}<br>
+        Баллы: <strong>${sign}${h.points}</strong><br>
+        <span style="color: var(--muted);">${escapeText(h.lesson)}</span>
+      `;
+      el.recap.appendChild(item);
+    }
+
+    const flags = Object.keys(state.flags);
+    if (flags.length) {
+      const f = document.createElement("div");
+      f.className = "recapItem";
+      f.innerHTML = `<b>Сработавшие маркеры:</b> ${escapeText(flags.join(", "))}`;
+      el.recap.appendChild(f);
+    }
+  }
+
+  function resultText() {
+    const score = state.lastEnding ? state.lastEnding.score : finalScore();
+    const title = state.lastEnding ? state.lastEnding.ending.title : "Финал";
+    return `AGI: Последний Рубеж — мой результат: ${score}/100. ${title}.`;
+  }
+
+  async function copyResult() {
+    const text = resultText();
+
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("Результат скопирован.");
+    } catch (_) {
+      toast(text);
+    }
+  }
+
+  async function shareResult() {
+    const text = resultText();
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "AGI: Последний Рубеж",
+          text,
+          url: location.href
+        });
+      } catch (_) {}
+    } else {
+      copyResult();
+    }
+  }
+
+  function localStorageSafeSet(k, v) {
+    try {
+      localStorage.setItem(k, v);
+    } catch (_) {}
+  }
+
+  function openModal(title, html) {
+    el.modalTitle.textContent = title || "Справка";
+    if (html) el.modalBody.innerHTML = html;
+    el.modal.classList.remove("hidden");
+  }
+
+  function closeModal() {
+    el.modal.classList.add("hidden");
+  }
+
+  function showHowTo() {
+    openModal("Как играть", `
+      <p>
+        Это интерактивная игра-тест. Вы проходите историю и выбираете действия дежурного инженера.
+        Каждое решение меняет баллы и состояние бункера.
+      </p>
+      <ul>
+        <li><strong>Сеть</strong> — насколько хорошо защищена внутренняя инфраструктура.</li>
+        <li><strong>Энергия</strong> — способность поддерживать критические системы.</li>
+        <li><strong>Люди</strong> — здоровье, дисциплина и мораль команды.</li>
+      </ul>
+      <p>
+        Лучшие решения обычно связаны с: сегментацией, offline backup, проверкой подписей,
+        карантином неизвестных устройств, минимальным раскрытием данных, OPSEC,
+        журналированием и управляемым доверием.
+      </p>
+      <p>
+        Худшие решения: подключать неизвестные устройства к основной сети,
+        раскрывать координаты, верить фальшивым обновлениям, переносить доверенную систему
+        в недоверенную среду и пытаться «договориться» с активным противником без протокола.
+      </p>
+    `);
+  }
+
+  function startGame() {
+    audio.unlock();
+
+    el.startScreen.classList.add("hidden");
+    el.endingScreen.classList.add("hidden");
+    el.gameScreen.classList.remove("hidden");
+
+    resetState();
+    state.muted = audio.muted;
+    state.reduced = document.body.classList.contains("reduced");
+
+    renderNode("wake");
+  }
+
+  function restart() {
+    audio.click();
+    resetState();
+    el.endingScreen.classList.add("hidden");
+    el.gameScreen.classList.remove("hidden");
+    renderNode("wake");
+  }
+
+  function toggleMute() {
+    state.muted = !state.muted;
+    audio.setMuted(state.muted);
+    el.muteBtn.textContent = state.muted ? "🔇" : "🔊";
+    el.soundBtnStart.textContent = state.muted ? "Звук: выключен" : "Звук: включён";
+    toast(state.muted ? "Звук выключен." : "Звук включён.");
+  }
+
+  function toggleReduced() {
+    state.reduced = !state.reduced;
+    document.body.classList.toggle("reduced", state.reduced);
+
+    const noise = document.querySelector(".noise");
+    const scan = document.querySelector(".scanlines");
+    if (state.reduced) {
+      if (noise) noise.style.display = "none";
+      if (scan) scan.style.display = "none";
+      toast("Визуальные эффекты уменьшены.");
+    } else {
+      if (noise) noise.style.display = "";
+      if (scan) scan.style.display = "";
+      toast("Визуальные эффекты включены.");
+    }
+  }
+
+  async function toggleFullscreen() {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (_) {
+      toast("Полный экран недоступен в этом браузере.");
+    }
+  }
+
+  function bindEvents() {
+    el.startBtn.addEventListener("click", startGame);
+    el.howBtn.addEventListener("click", showHowTo);
+    el.helpBtn.addEventListener("click", showHowTo);
+    el.closeModalBtn.addEventListener("click", closeModal);
+    el.modal.addEventListener("click", (e) => {
+      if (e.target === el.modal) closeModal();
+    });
+
+    el.soundBtnStart.addEventListener("click", () => {
+      audio.unlock();
+      toggleMute();
+    });
+
+    el.muteBtn.addEventListener("click", toggleMute);
+    el.reduceBtn.addEventListener("click", toggleReduced);
+    el.fullBtn.addEventListener("click", toggleFullscreen);
+
+    el.restartBtn.addEventListener("click", restart);
+    el.copyBtn.addEventListener("click", copyResult);
+    el.shareBtn.addEventListener("click", shareResult);
+
+    window.addEventListener("keydown", (e) => {
+      if (el.gameScreen.classList.contains("hidden")) return;
+
+      const n = Number(e.key);
+      if (n >= 1 && n <= 3) {
+        const node = nodes[state.node];
+        if (node && node.choices && node.choices[n - 1]) {
+          choose(node.choices[n - 1], node);
+        }
+      }
+
+      if (e.key.toLowerCase() === "m") toggleMute();
+    });
+  }
+
+  function init() {
+    setStartImage();
+    bindEvents();
+
+    /*
+      Лёгкий prefetch только стартового следующего изображения.
+      Не грузим весь набор, чтобы не подвесить мобильные устройства.
+    */
+    const im = new Image();
+    im.loading = "lazy";
+    im.decoding = "async";
+    im.src = path(img.aida);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
